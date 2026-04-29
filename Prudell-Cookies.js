@@ -10,6 +10,7 @@ const PRUD_HUBSPOT_SRC = "//js-eu1.hs-scripts.com/147587338.js";
 const PRUD_HUBSPOT_SCRIPT_TOKEN = "hs-scripts.com/147587338.js";
 const PRUD_REQUIRE_INTERACTION_FOR_HUBSPOT = true;
 const PRUD_HUBSPOT_FALLBACK_DELAY_MS = 8000;
+const PRUD_INITIAL_COOKIE_BANNER_DELAY_MS = 800;
 
 // Always set this as early as possible to avoid eager widget loading.
 window.hsConversationsSettings = Object.assign(
@@ -365,10 +366,16 @@ function applyHubSpotConsent(consent) {
     prefs.style.display = "none";
   }
 
+  function showBannerDeferred() {
+    window.setTimeout(function () {
+      showBanner();
+    }, PRUD_INITIAL_COOKIE_BANNER_DELAY_MS);
+  }
+
   var existing = getConsent();
   if (!existing || TEST_MODE) {
     syncPreferenceToggles();
-    showBanner();
+    showBannerDeferred();
   } else {
     syncPreferenceToggles(existing);
     applyHubSpotConsent(existing);

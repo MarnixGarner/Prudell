@@ -16,7 +16,7 @@
     });
   }
 
-  function isLikelyCalcOrPopupTrigger(el) {
+  function isLikelyCalculatorTrigger(el) {
     if (!el) return false;
 
     var id = String(el.id || "");
@@ -25,7 +25,7 @@
     // Calculator/adviser IDs used across Prudell
     var idPattern = /^(bp|mf|mr|repay|sd|ip|ma|ra)(-|$)/i;
 
-    // Includes calculators + adviser/general-enquiry popup targets.
+    // Calculator popup targets only. Adviser/general forms are handled by Prudell-Forms.js.
     var openFormTargets = {
       "Borrowing-Power-Calc": true,
       "Affordability-Calc": true,
@@ -35,10 +35,7 @@
       "Mortgage-Finder-Calc": true,
       "Mortgage-Refinance-Calc": true,
       "Insurance-Protection-Calc": true,
-      "Risk-Assessment-Calc": true,
-      "Request-Adviser-Contact": true,
-      "General-Enquiry": true,
-      "General-Enquiries": true
+      "Risk-Assessment-Calc": true
     };
 
     return idPattern.test(id) || !!openFormTargets[target];
@@ -93,7 +90,7 @@
       : null;
 
     if (!trigger) return;
-    if (!isLikelyCalcOrPopupTrigger(trigger)) return;
+    if (!isLikelyCalculatorTrigger(trigger)) return;
 
     if (trigger.dataset.prudellReplayOnce === "true") {
       trigger.dataset.prudellReplayOnce = "false";

@@ -1048,6 +1048,47 @@ window.Webflow.push(function () {
     return false;
   }
 
+  function setPopupLayerActive(active) {
+    const popup = document.querySelector(".Pop-Up.Window");
+    const wrapper = document.getElementById("animation-wrapper");
+    const navs = Array.from(document.querySelectorAll(".w-nav"));
+
+    if (popup) {
+      if (active) {
+        popup.style.setProperty("position", "fixed", "important");
+        popup.style.setProperty("z-index", "2147483000", "important");
+      } else {
+        popup.style.removeProperty("position");
+        popup.style.removeProperty("z-index");
+      }
+    }
+
+    if (wrapper) {
+      if (active) {
+        wrapper.style.setProperty("position", "relative", "important");
+        wrapper.style.setProperty("z-index", "2147483001", "important");
+      } else {
+        wrapper.style.removeProperty("position");
+        wrapper.style.removeProperty("z-index");
+      }
+    }
+
+    navs.forEach(nav => {
+      if (active) {
+        nav.dataset.prudPopupPrevPointerEvents = nav.style.pointerEvents || "";
+        nav.style.setProperty("pointer-events", "none", "important");
+      } else {
+        const prev = nav.dataset.prudPopupPrevPointerEvents;
+        if (typeof prev === "string" && prev.length) {
+          nav.style.pointerEvents = prev;
+        } else {
+          nav.style.removeProperty("pointer-events");
+        }
+        delete nav.dataset.prudPopupPrevPointerEvents;
+      }
+    });
+  }
+
   function initCalculatorWhenReady(targetId) {
     if (!targetId) return;
 
@@ -1241,6 +1282,7 @@ window.Webflow.push(function () {
       /* SAFETY: ensure wrapper is ALWAYS visible */
       wrapper.style.display = "block";
       wrapper.style.display = "flex";
+      setPopupLayerActive(true);
 
       /* Show selected panel */
       panel.style.display = "flex";
@@ -1341,6 +1383,7 @@ window.Webflow.push(function () {
     /* Restore page scroll */
     document.documentElement.classList.remove("no-scroll");
     document.body.classList.remove("no-scroll");
+    setPopupLayerActive(false);
     window.scrollTo(0, savedScrollY);
     deactivatePopupAccessibility();
   }

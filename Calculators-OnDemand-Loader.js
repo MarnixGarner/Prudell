@@ -4,7 +4,8 @@
    Keep this file globally loaded; remove any static Calculators.js include.
 ------------------------------------------------------------ */
 (function () {
-  var SCRIPT_SRC = "https://cdn.jsdelivr.net/gh/MarnixGarner/Prudell@main/Calculators.js";
+  var SCRIPT_VERSION = "2026-05-09-1";
+  var SCRIPT_SRC = "https://cdn.jsdelivr.net/gh/MarnixGarner/Prudell@main/Calculators.js?v=" + SCRIPT_VERSION;
 
   var scriptsLoaded = false;
   var loading = false;

@@ -1051,7 +1051,6 @@ window.Webflow.push(function () {
   function setPopupLayerActive(active) {
     const popup = document.querySelector(".Pop-Up.Window");
     const wrapper = document.getElementById("animation-wrapper");
-    const navs = Array.from(document.querySelectorAll(".w-nav"));
 
     if (popup) {
       if (active) {
@@ -1066,29 +1065,10 @@ window.Webflow.push(function () {
     if (wrapper) {
       if (active) {
         wrapper.style.setProperty("position", "relative", "important");
-        wrapper.style.setProperty("z-index", "2147483001", "important");
       } else {
         wrapper.style.removeProperty("position");
-        wrapper.style.removeProperty("z-index");
       }
     }
-
-    navs.forEach(nav => {
-      if (active) {
-        if (!("prudPopupPrevPointerEvents" in nav.dataset)) {
-          nav.dataset.prudPopupPrevPointerEvents = nav.style.pointerEvents || "";
-        }
-        nav.style.setProperty("pointer-events", "none", "important");
-      } else {
-        const prev = nav.dataset.prudPopupPrevPointerEvents;
-        if (typeof prev === "string" && prev.length) {
-          nav.style.pointerEvents = prev;
-        } else {
-          nav.style.removeProperty("pointer-events");
-        }
-        delete nav.dataset.prudPopupPrevPointerEvents;
-      }
-    });
   }
 
   function refreshPopupLayerState() {

@@ -1075,7 +1075,9 @@ window.Webflow.push(function () {
 
     navs.forEach(nav => {
       if (active) {
-        nav.dataset.prudPopupPrevPointerEvents = nav.style.pointerEvents || "";
+        if (!("prudPopupPrevPointerEvents" in nav.dataset)) {
+          nav.dataset.prudPopupPrevPointerEvents = nav.style.pointerEvents || "";
+        }
         nav.style.setProperty("pointer-events", "none", "important");
       } else {
         const prev = nav.dataset.prudPopupPrevPointerEvents;
@@ -1088,6 +1090,69 @@ window.Webflow.push(function () {
       }
     });
   }
+
+  function refreshPopupLayerState() {
+    const popup = document.querySelector(".Pop-Up.Window");
+    const wrapper = document.getElementById("animation-wrapper");
+
+    const popupVisible = !!(
+      popup &&
+      getComputedStyle(popup).display !== "none" &&
+      getComputedStyle(popup).visibility !== "hidden" &&
+      parseFloat(getComputedStyle(popup).opacity || "1") > 0
+    );
+
+    const panelVisible = !!(
+      wrapper &&
+      Array.from(wrapper.children).some(child => {
+        if (!child || !child.id) return false;
+        return getComputedStyle(child).display !== "none";
+      })
+    );
+
+    setPopupLayerActive(popupVisible || panelVisible);
+  }
+
+  function initPopupLayerStateObserver() {
+    if (document.body?.dataset.prudPopupLayerObserverBound === "true") return;
+    if (document.body) {
+      document.body.dataset.prudPopupLayerObserverBound = "true";
+    }
+
+    const popup = document.querySelector(".Pop-Up.Window");
+    const wrapper = document.getElementById("animation-wrapper");
+
+    if (!popup && !wrapper) return;
+
+    const observer = new MutationObserver(() => {
+      requestAnimationFrame(refreshPopupLayerState);
+    });
+
+    if (popup) {
+      observer.observe(popup, {
+        attributes: true,
+        attributeFilter: ["style", "class"]
+      });
+    }
+
+    if (wrapper) {
+      observer.observe(wrapper, {
+        attributes: true,
+        attributeFilter: ["style", "class"],
+        childList: true,
+        subtree: true
+      });
+    }
+
+    // Covers close interactions that rely on IX2 classes/styles outside explicit handlers.
+    document.addEventListener("click", () => {
+      setTimeout(refreshPopupLayerState, 0);
+    }, true);
+
+    refreshPopupLayerState();
+  }
+
+  initPopupLayerStateObserver();
 
   function initCalculatorWhenReady(targetId) {
     if (!targetId) return;

@@ -28,12 +28,35 @@
   var scriptsLoaded = false;
   var loading = false;
   var pendingTrigger = null;
+  var emergencyReloadAttempted = false;
 
   function calculatorApiReady() {
     return typeof window.initCalculatorByTarget === "function";
   }
 
-  function waitForCalculatorApi(done) {
+  function forceReloadCalculatorsScript(done) {
+    var s = document.createElement("script");
+    var sep = SCRIPT_SRC.indexOf("?") === -1 ? "?" : "&";
+
+    window[SCRIPT_KEY] = false;
+    s.src = SCRIPT_SRC + sep + "cb=" + Date.now();
+    s.defer = true;
+
+    s.onload = function () {
+      waitForCalculatorApi(done, false);
+    };
+
+    s.onerror = function () {
+      // eslint-disable-next-line no-console
+      console.error("[PRUDELL] Failed emergency reload for Calculators.js");
+      if (done) done();
+    };
+
+    document.body.appendChild(s);
+  }
+
+  function waitForCalculatorApi(done, allowRecovery) {
+    var canRecover = allowRecovery !== false;
     var maxChecks = 80; // ~2s at 25ms interval
     var checks = 0;
 
@@ -46,6 +69,11 @@
 
       checks += 1;
       if (checks >= maxChecks) {
+        if (!calculatorApiReady() && canRecover && !emergencyReloadAttempted) {
+          emergencyReloadAttempted = true;
+          forceReloadCalculatorsScript(done);
+          return;
+        }
         if (done) done();
         return;
       }

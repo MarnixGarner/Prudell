@@ -5,8 +5,25 @@
 ------------------------------------------------------------ */
 (function () {
   var SCRIPT_VERSION = "2026-05-09-1";
-  var SCRIPT_SRC = "https://cdn.jsdelivr.net/gh/MarnixGarner/Prudell@main/Calculators.js?v=" + SCRIPT_VERSION;
+  var SCRIPT_SRC = resolveCalculatorsScriptSrc();
   var SCRIPT_KEY = "__PRUDELL_MAIN_SCRIPT_LOADED__";
+
+  function resolveCalculatorsScriptSrc() {
+    var fallback = "https://cdn.jsdelivr.net/gh/MarnixGarner/Prudell@main/Calculators.js?v=" + SCRIPT_VERSION;
+    var scripts = Array.from(document.querySelectorAll("script[src]"));
+    var loaderScript = scripts.find(function (s) {
+      return /\/Calculators-OnDemand-Loader\.js/i.test(String(s.getAttribute("src") || ""));
+    }) || document.currentScript;
+
+    if (!loaderScript) return fallback;
+
+    var src = String(loaderScript.getAttribute("src") || "");
+    var match = src.match(/^(https:\/\/cdn\.jsdelivr\.net\/gh\/MarnixGarner\/Prudell@[^/]+)\/Calculators-OnDemand-Loader\.js(?:\?.*)?$/i);
+
+    if (!match) return fallback;
+
+    return match[1] + "/Calculators.js?v=" + SCRIPT_VERSION;
+  }
 
   var scriptsLoaded = false;
   var loading = false;

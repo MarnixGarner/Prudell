@@ -871,6 +871,7 @@ window.Webflow.push(function () {
     return null;
   }
 
+  let savedScrollY = 0;
   let activePopupPanel = null;
   let lastPopupTrigger = null;
 
@@ -1045,6 +1046,27 @@ window.Webflow.push(function () {
     if (tag === "input" || tag === "select" || tag === "textarea") return true;
 
     return false;
+  }
+
+  function initCalculatorWhenReady(targetId) {
+    if (!targetId) return;
+
+    let attempts = 0;
+    const maxAttempts = 12;
+
+    function tryInit() {
+      if (typeof window.initCalculatorByTarget === "function") {
+        window.initCalculatorByTarget(targetId);
+        return;
+      }
+
+      attempts += 1;
+      if (attempts < maxAttempts) {
+        setTimeout(tryInit, 40);
+      }
+    }
+
+    tryInit();
   }
 
   document.querySelectorAll("[data-open-form]").forEach(trigger => {
@@ -1245,9 +1267,7 @@ window.Webflow.push(function () {
 
       /* ---------- GUARDED INITIALISATION ---------- */
 
-      if (typeof window.initCalculatorByTarget === 'function') {
-        window.initCalculatorByTarget(targetId);
-      }
+      initCalculatorWhenReady(targetId);
 
       /* ---------- ADVISER + GENERAL ENQUIRIES POPUPS ---------- */
 

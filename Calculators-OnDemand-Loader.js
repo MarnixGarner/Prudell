@@ -10,6 +10,31 @@
   var loading = false;
   var pendingTrigger = null;
 
+  function calculatorApiReady() {
+    return typeof window.initCalculatorByTarget === "function";
+  }
+
+  function waitForCalculatorApi(done) {
+    var maxChecks = 80; // ~2s at 25ms interval
+    var checks = 0;
+
+    (function tick() {
+      if (calculatorApiReady()) {
+        scriptsLoaded = true;
+        if (done) done();
+        return;
+      }
+
+      checks += 1;
+      if (checks >= maxChecks) {
+        if (done) done();
+        return;
+      }
+
+      setTimeout(tick, 25);
+    })();
+  }
+
   function hasCalculatorScriptTag() {
     return Array.from(document.querySelectorAll("script[src]")).some(function (s) {
       return String(s.getAttribute("src") || "").indexOf("/Calculators.js") !== -1;
@@ -42,9 +67,25 @@
   }
 
   function loadCalculatorsScript(done) {
-    if (scriptsLoaded || hasCalculatorScriptTag()) {
-      scriptsLoaded = true;
+    if (scriptsLoaded && calculatorApiReady()) {
       if (done) done();
+      return;
+    }
+
+    // If another include already exists (e.g. deferred static include),
+    // wait for exported API readiness instead of replaying too early.
+    if (hasCalculatorScriptTag() && !loading) {
+      loading = true;
+      waitForCalculatorApi(function () {
+        loading = false;
+        if (done) done();
+
+        if (pendingTrigger) {
+          var replay = pendingTrigger;
+          pendingTrigger = null;
+          replay();
+        }
+      });
       return;
     }
 
@@ -60,16 +101,17 @@
     s.defer = true;
 
     s.onload = function () {
-      scriptsLoaded = true;
-      loading = false;
+      waitForCalculatorApi(function () {
+        loading = false;
 
-      if (done) done();
+        if (done) done();
 
-      if (pendingTrigger) {
-        var replay = pendingTrigger;
-        pendingTrigger = null;
-        replay();
-      }
+        if (pendingTrigger) {
+          var replay = pendingTrigger;
+          pendingTrigger = null;
+          replay();
+        }
+      });
     };
 
     s.onerror = function () {

@@ -262,6 +262,79 @@ ${block("CUSTOMER DETAILS")}`;
     }, 40);
   }
 
+  function stripCommas(v) {
+    return String(v || "").replace(/,/g, "");
+  }
+
+  function num(el, fb = 0) {
+    if (!el) return fb;
+    const raw = stripCommas(el.value || "").replace(/[^0-9.\-]/g, "");
+    const parsed = parseFloat(raw);
+    return Number.isNaN(parsed) ? fb : parsed;
+  }
+
+  function focusFieldBoxArea(target) {
+    if (!target) return null;
+
+    const fieldBox =
+      (target.matches && target.matches(".field-box-area") ? target : target.closest?.(".field-box-area")) ||
+      null;
+
+    if (!fieldBox) return null;
+
+    if (!fieldBox.hasAttribute("tabindex")) {
+      fieldBox.setAttribute("tabindex", "-1");
+    }
+
+    try {
+      fieldBox.focus({ preventScroll: true });
+    } catch (e) {
+      fieldBox.focus();
+    }
+
+    return fieldBox;
+  }
+
+  function focusErrorMessage(errorElement, targetField) {
+    if (!errorElement) return;
+
+    const elementToFocus = targetField || errorElement;
+
+    try {
+      elementToFocus.focus({ preventScroll: false });
+    } catch (e) {
+      elementToFocus.focus();
+    }
+
+    requestAnimationFrame(() => {
+      if (typeof errorElement.scrollIntoView === "function") {
+        try {
+          errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch (e) {
+          errorElement.scrollIntoView();
+        }
+      }
+    });
+  }
+
+  function createValidationTracker() {
+    const errors = [];
+    let firstErrorTarget = null;
+
+    return {
+      errors,
+      add(message, targetField) {
+        errors.push(message);
+        if (!firstErrorTarget && targetField) {
+          firstErrorTarget = targetField;
+        }
+      },
+      firstTarget(fallbackTarget) {
+        return firstErrorTarget || fallbackTarget || null;
+      }
+    };
+  }
+
   /* ===== GLOBAL NUMBER INPUT — AUTO-SELECT ON FOCUS ===== */
   document.addEventListener("focusin", ev => {
     const el = ev.target;

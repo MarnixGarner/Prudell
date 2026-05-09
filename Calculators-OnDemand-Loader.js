@@ -6,6 +6,7 @@
 (function () {
   var SCRIPT_VERSION = "2026-05-09-1";
   var SCRIPT_SRC = "https://cdn.jsdelivr.net/gh/MarnixGarner/Prudell@main/Calculators.js?v=" + SCRIPT_VERSION;
+  var SCRIPT_KEY = "__PRUDELL_MAIN_SCRIPT_LOADED__";
 
   var scriptsLoaded = false;
   var loading = false;
@@ -36,9 +37,19 @@
     })();
   }
 
-  function hasCalculatorScriptTag() {
-    return Array.from(document.querySelectorAll("script[src]")).some(function (s) {
+  function getCalculatorScriptTags() {
+    return Array.from(document.querySelectorAll("script[src]")).filter(function (s) {
       return String(s.getAttribute("src") || "").indexOf("/Calculators.js") !== -1;
+    });
+  }
+
+  function hasAnyCalculatorScriptTag() {
+    return getCalculatorScriptTags().length > 0;
+  }
+
+  function hasDesiredCalculatorScriptTag() {
+    return getCalculatorScriptTags().some(function (s) {
+      return String(s.getAttribute("src") || "").indexOf("v=" + SCRIPT_VERSION) !== -1;
     });
   }
 
@@ -73,9 +84,8 @@
       return;
     }
 
-    // If another include already exists (e.g. deferred static include),
-    // wait for exported API readiness instead of replaying too early.
-    if (hasCalculatorScriptTag() && !loading) {
+    // If the desired version is already on the page, wait for API readiness.
+    if (hasDesiredCalculatorScriptTag() && !loading) {
       loading = true;
       waitForCalculatorApi(function () {
         loading = false;
@@ -88,6 +98,12 @@
         }
       });
       return;
+    }
+
+    // If an older/static Calculators.js include is present, force a clean reload
+    // of the desired version instead of treating the stale tag as valid.
+    if (hasAnyCalculatorScriptTag() && !hasDesiredCalculatorScriptTag()) {
+      window[SCRIPT_KEY] = false;
     }
 
     if (loading) {

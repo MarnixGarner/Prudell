@@ -273,6 +273,14 @@ ${block("CUSTOMER DETAILS")}`;
     return Number.isNaN(parsed) ? fb : parsed;
   }
 
+  function textOf(id) {
+    return String(document.getElementById(id)?.textContent || "").trim();
+  }
+
+  function valueOf(id) {
+    return String(document.getElementById(id)?.value || "").trim();
+  }
+
   function focusFieldBoxArea(target) {
     if (!target) return null;
 

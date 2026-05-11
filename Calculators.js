@@ -273,6 +273,14 @@ ${block("CUSTOMER DETAILS")}`;
     return Number.isNaN(parsed) ? fb : parsed;
   }
 
+  function textOf(id) {
+    return String(document.getElementById(id)?.textContent || "").trim();
+  }
+
+  function valueOf(id) {
+    return String(document.getElementById(id)?.value || "").trim();
+  }
+
   function focusFieldBoxArea(target) {
     if (!target) return null;
 
@@ -4668,7 +4676,7 @@ function impactBullets() {
   const arr = [];
 
   if (mortgageRatio > 3)
-    arr.push(`Mortgage balance equals ${mortgageRatio.toFixed(1)}× annual income.`);
+    arr.push(`Mortgage balance equals x${mortgageRatio.toFixed(1)} annual income.`);
 
   if (d1Yes)
     arr.push(`Dependants rely on household income.`);

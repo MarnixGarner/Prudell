@@ -4676,7 +4676,7 @@ function impactBullets() {
   const arr = [];
 
   if (mortgageRatio > 3)
-    arr.push(`Mortgage balance equals ${mortgageRatio.toFixed(1)}× annual income.`);
+    arr.push(`Mortgage balance equals x${mortgageRatio.toFixed(1)} annual income.`);
 
   if (d1Yes)
     arr.push(`Dependants rely on household income.`);
